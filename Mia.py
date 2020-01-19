@@ -1,5 +1,6 @@
 import speech_recognition as sr
 import os
+import mysql.connector
 from bs4 import BeautifulSoup
 import requests
 import urllib.request
@@ -7,6 +8,7 @@ import pyttsx3
 os.add_dll_directory(r'C:\Program Files (x86)\VideoLAN\VLC') # Need this if VLC path is not added in the PATH Variable
 import vlc
 import pafy
+import time
 from datetime import datetime
 
 class MusiPi:
@@ -14,6 +16,8 @@ class MusiPi:
     def __init__(self):
         self.engine = pyttsx3.init('sapi5',False)
         self.engine.setProperty('voice', 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
+        self.mia_connector = mysql.connector.connect(user='root', password='e@Ad(f)12!@', host='127.0.0.1', database='mia')
+        self.mia_connector.close()
 
     def talk(self,audio):
         print(audio) #later should be removed
@@ -31,8 +35,7 @@ class MusiPi:
         Media.get_mrl()
         player.set_media(Media)
         player.play()
-        while True:
-            pass
+        print(player.get_state()) #TO KEEP THE PLAYER RUNNING 
 
     def find_links(self,song):
         found_videos = []
@@ -43,6 +46,7 @@ class MusiPi:
         youtube_formatted_html = BeautifulSoup(youtube_unformatted_html,'html.parser')
         for video in youtube_formatted_html.findAll(attrs={'class':'yt-uix-tile-link'}):
             found_videos.append('https://www.youtube.com' + video['href'])
+            break
         return found_videos
 
     def command(self):
@@ -74,7 +78,9 @@ class MusiPi:
             try:
                 song_name = song_recognizer.recognize_google(audio)
                 found_links = self.find_links(song_name)
-                print(found_links)
+                print(f"Trying to find {song_name}...")
+                print("Found Successfully")
+                print(f"Link : {found_links}")
                 break
 
             except sr.UnknownValueError:
